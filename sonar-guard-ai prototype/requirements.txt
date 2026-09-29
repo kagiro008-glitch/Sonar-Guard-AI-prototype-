@@ -1,0 +1,15 @@
+numpy>=2.0.0
+opencv-python-headless>=4.10.0
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+python-multipart>=0.0.12
+pydantic>=2.9.0
+pillow>=11.0.0
+torch>=2.4.0
+
+# Optional extras (install manually when needed for SIH full feature set):
+#   transformers>=4.40        # SegFormer real-weight semantic segmentation path
+#   pyxtf>=1.5                # Faster native XTF log parsing (falls back to built-in parser)
+#   onnx>=1.16, onnxruntime>=1.18  # ONNX runtime after --export-trt
+#   PyYAML>=6.0               # Read samples_manifest.yaml in addition to JSON
+#   ultralytics>=8.3.0        # YOLOv11 sonar-trained weights path

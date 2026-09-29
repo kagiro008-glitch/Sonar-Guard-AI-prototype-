@@ -1,0 +1,20 @@
+{
+  "models": [
+    {
+      "model": "autoencoder",
+      "exported": true,
+      "onnx": "C:\\Users\\Tathagata Mondal\\sonar-guard-ai\\weights\\export\\autoencoder.onnx",
+      "engine": null,
+      "backend": "onnx-placeholder",
+      "note": "autoencoder real ONNX export skipped (missing onnx/onnxscript?); placeholder artefact written. Install the optional `onnx` package and re-run."
+    },
+    {
+      "model": "segformer_fallback",
+      "exported": true,
+      "onnx": "C:\\Users\\Tathagata Mondal\\sonar-guard-ai\\weights\\export\\segformer_fallback.onnx",
+      "engine": null,
+      "backend": "onnx-placeholder",
+      "note": "segformer_fallback real ONNX export skipped (missing onnx/onnxscript?); placeholder artefact written. Install the optional `onnx` package and re-run."
+    }
+  ]
+}

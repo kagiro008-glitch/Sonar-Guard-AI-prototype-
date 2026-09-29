@@ -1,0 +1,261 @@
+sss_adv_nets_01.png:
+  mask: sss_adv_nets_01_mask.png
+  boxes:
+  - y: 193
+    x: 221
+    w: 162
+    h: 54
+    class: plastic_net
+  - y: 467
+    x: 520
+    w: 130
+    h: 57
+    class: plastic_net
+  simulated_gps_waypoints:
+  - lat: 13.0480005
+    lon: 80.4120006
+    ping: 0
+  - lat: 13.048061
+    lon: 80.4120298
+    ping: 32
+  - lat: 13.048119
+    lon: 80.4120609
+    ping: 64
+  - lat: 13.04818
+    lon: 80.4120909
+    ping: 96
+  - lat: 13.0482406
+    lon: 80.4121195
+    ping: 128
+  - lat: 13.0483007
+    lon: 80.412149
+    ping: 160
+  - lat: 13.0483608
+    lon: 80.4121798
+    ping: 192
+  - lat: 13.0484198
+    lon: 80.4122106
+    ping: 224
+  - lat: 13.0484797
+    lon: 80.4122394
+    ping: 256
+  - lat: 13.0485394
+    lon: 80.4122693
+    ping: 288
+  - lat: 13.0485991
+    lon: 80.4123009
+    ping: 320
+  - lat: 13.0486592
+    lon: 80.4123301
+    ping: 352
+  - lat: 13.048721
+    lon: 80.4123609
+    ping: 384
+  - lat: 13.0487801
+    lon: 80.4123909
+    ping: 416
+  - lat: 13.0488401
+    lon: 80.4124206
+    ping: 448
+  - lat: 13.0489005
+    lon: 80.412449
+    ping: 480
+  - lat: 13.0489592
+    lon: 80.4124798
+    ping: 512
+  - lat: 13.0490206
+    lon: 80.4125107
+    ping: 544
+  - lat: 13.0490805
+    lon: 80.4125407
+    ping: 576
+  - lat: 13.049139
+    lon: 80.4125692
+    ping: 608
+  mpp_along: 0.04
+  mpp_across: 0.05
+  params:
+    mode: advanced
+    seed: 42
+    kind: nets
+    mpp_along: 0.04
+    mpp_across: 0.05
+sss_adv_barrels_02.png:
+  mask: sss_adv_barrels_02_mask.png
+  boxes:
+  - y: 321
+    x: 411
+    w: 44
+    h: 50
+    class: metal_barrel
+  - y: 474
+    x: 624
+    w: 46
+    h: 51
+    class: tire
+  - y: 203
+    x: 704
+    w: 48
+    h: 52
+    class: metal_barrel
+  simulated_gps_waypoints:
+  - lat: 13.0479997
+    lon: 80.4119997
+    ping: 0
+  - lat: 13.0480609
+    lon: 80.4120294
+    ping: 32
+  - lat: 13.04812
+    lon: 80.4120595
+    ping: 64
+  - lat: 13.0481791
+    lon: 80.4120904
+    ping: 96
+  - lat: 13.0482396
+    lon: 80.4121198
+    ping: 128
+  - lat: 13.0482995
+    lon: 80.4121491
+    ping: 160
+  - lat: 13.0483598
+    lon: 80.4121798
+    ping: 192
+  - lat: 13.048419
+    lon: 80.4122108
+    ping: 224
+  - lat: 13.0484791
+    lon: 80.4122406
+    ping: 256
+  - lat: 13.0485402
+    lon: 80.4122696
+    ping: 288
+  - lat: 13.0485993
+    lon: 80.4123001
+    ping: 320
+  - lat: 13.0486596
+    lon: 80.4123305
+    ping: 352
+  - lat: 13.0487197
+    lon: 80.412361
+    ping: 384
+  - lat: 13.0487798
+    lon: 80.4123906
+    ping: 416
+  - lat: 13.0488408
+    lon: 80.4124202
+    ping: 448
+  - lat: 13.0489003
+    lon: 80.4124507
+    ping: 480
+  - lat: 13.0489609
+    lon: 80.4124794
+    ping: 512
+  - lat: 13.0490195
+    lon: 80.4125095
+    ping: 544
+  - lat: 13.0490799
+    lon: 80.4125405
+    ping: 576
+  - lat: 13.0491396
+    lon: 80.4125693
+    ping: 608
+  mpp_along: 0.04
+  mpp_across: 0.05
+  params:
+    mode: advanced
+    seed: 139
+    kind: barrels
+    mpp_along: 0.04
+    mpp_across: 0.05
+sss_adv_mixed_03.png:
+  mask: sss_adv_mixed_03_mask.png
+  boxes:
+  - y: 129
+    x: 160
+    w: 150
+    h: 43
+    class: plastic_net
+  - y: 364
+    x: 505
+    w: 55
+    h: 58
+    class: metal_barrel
+  - y: 503
+    x: 303
+    w: 46
+    h: 46
+    class: wood_wreck
+  - y: 260
+    x: 720
+    w: 34
+    h: 38
+    class: tire
+  simulated_gps_waypoints:
+  - lat: 13.0480005
+    lon: 80.4119994
+    ping: 0
+  - lat: 13.0480603
+    lon: 80.4120307
+    ping: 32
+  - lat: 13.0481207
+    lon: 80.4120602
+    ping: 64
+  - lat: 13.0481802
+    lon: 80.4120909
+    ping: 96
+  - lat: 13.0482407
+    lon: 80.4121192
+    ping: 128
+  - lat: 13.0483006
+    lon: 80.4121495
+    ping: 160
+  - lat: 13.0483602
+    lon: 80.4121802
+    ping: 192
+  - lat: 13.0484191
+    lon: 80.4122105
+    ping: 224
+  - lat: 13.0484792
+    lon: 80.4122391
+    ping: 256
+  - lat: 13.048541
+    lon: 80.4122704
+    ping: 288
+  - lat: 13.0486001
+    lon: 80.4123006
+    ping: 320
+  - lat: 13.0486597
+    lon: 80.4123301
+    ping: 352
+  - lat: 13.0487194
+    lon: 80.41236
+    ping: 384
+  - lat: 13.0487806
+    lon: 80.4123892
+    ping: 416
+  - lat: 13.0488409
+    lon: 80.4124198
+    ping: 448
+  - lat: 13.0488996
+    lon: 80.4124498
+    ping: 480
+  - lat: 13.0489605
+    lon: 80.4124799
+    ping: 512
+  - lat: 13.0490203
+    lon: 80.4125094
+    ping: 544
+  - lat: 13.0490792
+    lon: 80.4125401
+    ping: 576
+  - lat: 13.0491397
+    lon: 80.4125706
+    ping: 608
+  mpp_along: 0.04
+  mpp_across: 0.05
+  params:
+    mode: advanced
+    seed: 236
+    kind: mixed
+    mpp_along: 0.04
+    mpp_across: 0.05

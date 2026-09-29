@@ -1,0 +1,130 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          80.41214,
+          13.048065
+        ]
+      },
+      "properties": {
+        "id": 1,
+        "label": "plastic_net",
+        "score": 0.957,
+        "source": "blob_fallback",
+        "shadow": "consistent",
+        "alert": true,
+        "severity": "critical",
+        "along_m": 28.5,
+        "across_m": 59.82,
+        "precision_meters": 0.07071,
+        "range_from_track_m": 8.62,
+        "gps_ping_index": 198,
+        "gps_timestamp": 1700000019.7
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          80.411967,
+          13.04809
+        ]
+      },
+      "properties": {
+        "id": 2,
+        "label": "unclassified",
+        "score": 0.956,
+        "source": "blob_fallback",
+        "shadow": "consistent",
+        "alert": true,
+        "severity": "critical",
+        "along_m": 24.1,
+        "across_m": 37.42,
+        "precision_meters": 0.07071,
+        "range_from_track_m": 13.78,
+        "gps_ping_index": 286,
+        "gps_timestamp": 1700000028.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          80.412341,
+          13.048194
+        ]
+      },
+      "properties": {
+        "id": 3,
+        "label": "plastic_net",
+        "score": 0.939,
+        "source": "blob_fallback",
+        "shadow": "consistent",
+        "alert": true,
+        "severity": "critical",
+        "along_m": 7.45,
+        "across_m": 66.14,
+        "precision_meters": 0.07071,
+        "range_from_track_m": 14.94,
+        "gps_ping_index": 619,
+        "gps_timestamp": 1700000061.8
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          80.411944,
+          13.048024
+        ]
+      },
+      "properties": {
+        "id": 4,
+        "label": "plastic_net",
+        "score": 0.939,
+        "source": "blob_fallback",
+        "shadow": "consistent",
+        "alert": true,
+        "severity": "critical",
+        "along_m": 34.75,
+        "across_m": 42.54,
+        "precision_meters": 0.07071,
+        "range_from_track_m": 8.66,
+        "gps_ping_index": 73,
+        "gps_timestamp": 1700000007.2
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          80.412332,
+          13.048137
+        ]
+      },
+      "properties": {
+        "id": 5,
+        "label": "plastic_net",
+        "score": 0.938,
+        "source": "blob_fallback",
+        "shadow": "consistent",
+        "alert": true,
+        "severity": "critical",
+        "along_m": 16.6,
+        "across_m": 72.18,
+        "precision_meters": 0.07071,
+        "range_from_track_m": 20.98,
+        "gps_ping_index": 436,
+        "gps_timestamp": 1700000043.5
+      }
+    }
+  ]
+}

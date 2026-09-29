@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SonarGuard AI</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; overflow-x: hidden; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Inter", Roboto, system-ui, sans-serif;
+      background: radial-gradient(1300px 520px at 8% -10%, #0e2a40 0%, transparent 62%),
+                  radial-gradient(950px 420px at 100% 0%, #0c2434 0%, transparent 55%),
+                  #061018;
+      color: #e2ecf3;
+      min-height: 100vh;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .nowrap { white-space: nowrap; }
+    .ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+    .break-any { overflow-wrap: anywhere; word-break: break-word; min-width: 0; }
+
+    header {
+      padding: 16px 28px 14px 28px;
+      border-bottom: 1px solid #1a3246;
+      background: linear-gradient(180deg, rgba(16,44,66,0.65) 0%, rgba(10,24,36,0.82) 100%);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px 18px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    header .title-block { flex: 1 1 360px; min-width: 0; }
+    header h1 {
+      margin: 0 0 2px 0;
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      line-height: 1.2;
+    }
+    header h1 span {
+      color: #7ad0ff;
+      font-weight: 500;
+      font-size: 13px;
+      letter-spacing: 1px;
+      margin-left: 10px;
+      opacity: 0.92;
+      text-transform: uppercase;
+    }
+    header .sub {
+      font-size: 12.5px;
+      color: #8aa4b8;
+      margin: 0;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+    header .links { display: flex; gap: 10px; flex-wrap: wrap; }
+    header .links a, header .links button.btn-link {
+      color: #7ad0ff;
+      text-decoration: none;
+      border: 1px solid #245570;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      background: linear-gradient(180deg, #123146 0%, #0c2434 100%);
+      transition: all 0.15s ease;
+      font-family: inherit;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      line-height: 1.2;
+    }
+    header .links a:hover, header .links button.btn-link:hover {
+      background: linear-gradient(180deg, #18405b 0%, #102b40 100%);
+      border-color: #30708f;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(10, 40, 60, 0.5);
+    }
+
+    .app-wrap {
+      padding: 20px 28px 28px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 2300px;
+      margin: 0 auto;
+    }
+
+    .main-row {
+      display: grid;
+      grid-template-columns: minmax(340px, 380px) 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 1150px) {
+      .main-row { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: linear-gradient(180deg, #0e1e2a 0%, #0b1822 100%);
+      border: 1px solid #1d3344;
+      border-radius: 14px;
+      padding: 16px 18px 18px 18px;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.03) inset, 0 8px 22px rgba(0,0,0,0.32);
+      min-width: 0;
+    }
+    .card > h3.card-title {
+      margin: 0 0 14px 0;
+      font-size: 13px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: #7ad0ff;
+      font-weight: 600;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #1a2f40;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .card h3:not(.card-title) { margin-top: 22px; }
+
+    .row { display: flex; align-items: center; gap: 10px; }
+    .row-spaced {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px 16px;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+
+    select, input[type=file] {
+      background: #0a1c28;
+      color: #e2ecf3;
+      border: 1px solid #1f3a4f;
+      border-radius: 10px;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    select {
+      width: 100%;
+      cursor: pointer;
+      min-width: 0;
+      text-overflow: ellipsis;
+    }
+    select:focus, input[type=file]:focus {
+      border-color: #3080b0;
+      box-shadow: 0 0 0 3px rgba(80,160,220,0.14);
+    }
+    input[type=file] {
+      width: 100%;
+      padding: 6px;
+    }
+    input[type=file]::file-selector-button {
+      background: linear-gradient(180deg, #215071 0%, #19415e 100%);
+      color: #fff;
+      border: 1px solid #2b6086;
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-family: inherit;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+
+    button {
+      cursor: pointer;
+      background: linear-gradient(180deg, #1f94d4 0%, #1673a6 100%);
+      color: #fff;
+      border: 1px solid #2380b8;
+      border-radius: 10px;
+      padding: 9px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      transition: all 0.15s ease;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      line-height: 1.2;
+    }
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      background: linear-gradient(180deg, #2aa3e4 0%, #1a7fb4 100%);
+      box-shadow: 0 4px 14px rgba(20, 100, 150, 0.4), 0 1px 0 rgba(255,255,255,0.08) inset;
+    }
+    button:active:not(:disabled) { transform: translateY(0); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    button.secondary {
+      background: linear-gradient(180deg, #214a6a 0%, #173a57 100%);
+      border-color: #2c5e83;
+      color: #cfe6f2;
+    }
+    button.secondary:hover:not(:disabled) {
+      background: linear-gradient(180deg, #2a5a7e 0%, #1d4665 100%);
+      box-shadow: 0 3px 10px rgba(30, 70, 110, 0.4);
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.45);
+      border-top-color: #fff;
+      animation: spin 0.8s linear infinite;
+      flex-shrink: 0;
+    }
+
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 12px 0 10px; }
+    .btn-row button { flex: 1 1 140px; min-width: 130px; }
+
+    .section-label {
+      display: block;
+      font-size: 11px;
+      color: #7ad0ff;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin: 14px 0 6px 0;
+    }
+    .section-label:first-child { margin-top: 0; }
+
+    .preview-wrap {
+      position: relative;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        linear-gradient(180deg, rgba(10,30,50,0.5), rgba(0,0,0,0.7)),
+        repeating-linear-gradient(45deg, #03080d 0, #03080d 20px, #040a11 20px, #040a11 40px);
+      border: 1px solid #183145;
+      border-radius: 12px;
+      overflow: hidden;
+      min-height: 60vh;
+      max-height: 78vh;
+      aspect-ratio: auto;
+    }
+    .preview-wrap.is-loading::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(4, 12, 18, 0.55);
+      backdrop-filter: blur(1px);
+      z-index: 3;
+    }
+    .preview-wrap.is-loading::before {
+      content: "";
+      position: absolute;
+      width: 44px; height: 44px;
+      left: 50%; top: 50%;
+      margin: -22px 0 0 -22px;
+      border-radius: 50%;
+      border: 3px solid rgba(120, 200, 240, 0.25);
+      border-top-color: #7ad0ff;
+      animation: spin 0.9s linear infinite;
+      z-index: 4;
+    }
+    #preview {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 78vh;
+      object-fit: contain;
+      background: transparent;
+      border-radius: 0;
+      min-height: 0;
+      position: relative;
+      z-index: 1;
+    }
+    .preview-empty {
+      padding: 50px 26px;
+      text-align: center;
+      color: #7899ad;
+      font-size: 14px;
+      max-width: 520px;
+      z-index: 2;
+    }
+    .preview-empty .icon {
+      font-size: 56px;
+      opacity: 0.6;
+      margin-bottom: 12px;
+      line-height: 1;
+    }
+    .preview-empty h4 {
+      margin: 0 0 6px 0;
+      font-size: 15px;
+      color: #aac9da;
+      font-weight: 600;
+    }
+    .preview-empty p { margin: 4px 0; }
+
+    #map {
+      height: 440px;
+      border-radius: 12px;
+      border: 1px solid #1a3246;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3);
+    }
+    .map-marker-icon {
+      background: transparent;
+      border: 0;
+    }
+    .map-marker-label {
+      display: block;
+      width: 30px;
+      height: 30px;
+      border: 3px solid;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 24px;
+      text-align: center;
+      text-shadow: 0 1px 2px #000;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.75);
+    }
+    .map-legend {
+      display: flex;
+      align-items: center;
+      gap: 8px 16px;
+      flex-wrap: wrap;
+      margin: 0 0 10px;
+      color: #b8cbd8;
+      font-size: 11px;
+    }
+    .map-legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .map-legend-swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid #263b49;
+    }
+    .map-legend-outline {
+      width: 16px;
+      height: 12px;
+      border: 3px solid #71808a;
+      border-radius: 4px;
+    }
+
+    .muted { color: #8aa4b8; font-size: 13px; line-height: 1.55; }
+
+    #stats {
+      margin: 14px 0 8px 0;
+      padding: 11px 12px;
+      background: linear-gradient(180deg, #071826 0%, #05121c 100%);
+      border: 1px solid #1a3246;
+      border-radius: 9px;
+      font-size: 12.5px;
+      color: #cfe6f2;
+      font-variant-numeric: tabular-nums;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 14px;
+      align-items: center;
+    }
+    #stats .stat {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 500;
+    }
+    #stats .stat b {
+      color: #fff;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .sev-summary { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+    .sev-chip {
+      padding: 5px 11px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sev-chip::before {
+      content: "";
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: 0.8;
+    }
+
+    .perf {
+      margin-top: 14px;
+      padding: 13px 14px 12px 14px;
+      background: linear-gradient(180deg, #071a26 0%, #05151f 100%);
+      border: 1px solid #143347;
+      border-radius: 10px;
+      min-width: 0;
+    }
+    .perf-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .perf-header h4 {
+      margin: 0;
+      font-size: 11.5px;
+      color: #7ad0ff;
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      font-weight: 600;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .perf-header .perf-hint {
+      font-size: 10.5px;
+      color: #6e8a9e;
+      letter-spacing: 0.2px;
+      flex-shrink: 0;
+    }
+    .perf .bars {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 12px;
+      min-width: 0;
+    }
+    .perf .bar-row {
+      display: grid;
+      grid-template-columns: 96px 1fr minmax(78px, auto);
+      gap: 10px;
+      align-items: center;
+      min-width: 0;
+    }
+    .perf .bar-row .label {
+      color: #b0c9da;
+      font-size: 11.5px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      overflow-wrap: anywhere;
+      min-width: 0;
+    }
+    .perf .bar-track {
+      height: 10px;
+      background: #0d283d;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #1a3c55;
+      min-width: 0;
+    }
+    .perf .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #1876b0 0%, #5eb4ee 80%, #8fd6ff 100%);
+      transition: width 0.35s ease;
+      min-width: 2px;
+    }
+    .perf .bar-val {
+      text-align: right;
+      color: #e2eef6;
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 2px 4px 2px 6px;
+      background: rgba(10, 40, 60, 0.55);
+      border: 1px solid #1a3c55;
+      border-radius: 6px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    @media (max-width: 400px) {
+      .perf .bar-row { grid-template-columns: 80px 1fr minmax(70px, auto); gap: 8px; }
+    }
+
+    .precision {
+      margin: 0;
+      padding: 7px 11px;
+      border-radius: 8px;
+      border: 1px solid #183f55;
+      font-size: 12px;
+      background: #0a2230;
+      font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .precision::before {
+      content: "";
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: 0.7;
+      flex-shrink: 0;
+    }
+    .precision.muted::before { background: #8aa4b8; opacity: 0.6; }
+    .precision.ok { color: #5fe0a0; border-color: #1c5a3e; background: #0a2418; }
+    .precision.warn { color: #ffbf6b; border-color: #6a4815; background: #2a1e0a; }
+
+    .alerts-wrap {
+      max-height: 340px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-right: 4px;
+      min-width: 0;
+    }
+    .alerts-wrap::-webkit-scrollbar { width: 7px; }
+    .alerts-wrap::-webkit-scrollbar-track { background: transparent; }
+    .alerts-wrap::-webkit-scrollbar-thumb {
+      background: #274a64;
+      border-radius: 4px;
+    }
+    .alerts-wrap::-webkit-scrollbar-thumb:hover { background: #325e80; }
+
+    .alert {
+      padding: 10px 12px 11px 12px;
+      border-left: 4px solid #ffb020;
+      margin: 8px 0;
+      background: linear-gradient(180deg, #13283a 0%, #0f202e 100%);
+      border-radius: 0 10px 10px 0;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      border-top: 1px solid #1a2f40;
+      border-right: 1px solid #1a2f40;
+      border-bottom: 1px solid #1a2f40;
+      transition: background 0.12s ease, transform 0.1s ease, border-color 0.12s ease;
+      min-width: 0;
+      position: relative;
+    }
+    .alert:hover {
+      background: linear-gradient(180deg, #163147 0%, #122636 100%);
+      transform: translateX(1px);
+    }
+    .alert-info { flex: 1 1 auto; min-width: 0; }
+    .alert-head {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 6px 10px;
+      min-width: 0;
+    }
+    .alert .name {
+      font-weight: 700;
+      font-size: 13.5px;
+      color: #eef6fb;
+      letter-spacing: 0.1px;
+      overflow-wrap: anywhere;
+    }
+    .alert .score {
+      color: #7ad0ff;
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      font-size: 12.5px;
+    }
+    .alert .source {
+      color: #8aa4b8;
+      font-size: 11px;
+      padding: 1px 7px;
+      border: 1px solid #20384a;
+      border-radius: 999px;
+      background: rgba(15,35,50,0.6);
+      white-space: nowrap;
+    }
+    .alert .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 10px;
+      margin-top: 5px;
+      font-size: 11px;
+      color: #86a0b2;
+      min-width: 0;
+    }
+    .alert .meta span {
+      padding: 1px 0;
+      overflow-wrap: anywhere;
+    }
+    .alert .meta span::before {
+      content: "· ";
+      color: #4a6a80;
+      font-weight: 700;
+    }
+    .alert .meta span:first-child::before { content: ""; display: none; }
+
+    .sev {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .sev.Critical { background: linear-gradient(180deg, #5a1111 0%, #3f0a0a 100%); color: #ff8f8f; border: 1px solid #802626; box-shadow: 0 0 0 1px rgba(255,80,80,0.15) inset; }
+    .sev.High { background: linear-gradient(180deg, #4c2c10 0%, #351e0a 100%); color: #ffc88a; border: 1px solid #7c4a1a; }
+    .sev.Medium { background: linear-gradient(180deg, #16364a 0%, #0f2838 100%); color: #7fd0ff; border: 1px solid #285a72; }
+    .sev.Low { background: linear-gradient(180deg, #22303c 0%, #1a2630 100%); color: #b9c7cf; border: 1px solid #3a4a55; }
+
+    .bottom-row { display: grid; grid-template-columns: 1fr; }
+
+    .detail-meta {
+      margin: 8px 0 0 0;
+      padding: 0;
+      font-size: 11.5px;
+      color: #7a92a4;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 10px;
+    }
+    .detail-meta span {
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: #071826;
+      border: 1px solid #142e42;
+      color: #a8c0d0;
+      font-weight: 500;
+    }
+    .detail-meta b { color: #e2eef6; font-weight: 600; margin-right: 3px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title-block">
+      <h1>SonarGuard AI <span>Deep Horizon · SIH26057</span></h1>
+      <p class="muted sub">Dual-branch + SegFormer sonar analysis &nbsp;·&nbsp; preprocess → YOLO detect → autoencoder anomaly → SegFormer mask → shadow geometry → GeoJSON severity map</p>
+    </div>
+    <div class="links">
+      <a href="/flowchart">&#128200; Autoencoder Flowchart</a>
+      <button class="btn-link" id="refreshBtn" title="Reload preview, alerts, and map">&#x21bb; Refresh View</button>
+    </div>
+  </header>
+
+  <div class="app-wrap">
+    <div class="main-row">
+      <section class="card" id="sidebar">
+        <h3 class="card-title">Data Ingest <span class="muted" style="font-weight:500;font-size:11px;text-transform:none;letter-spacing:0">SSS sample or upload</span></h3>
+        <p class="muted" style="margin: 0 0 4px 0">Choose a synthetic side-scan sonar waterfall sample below, or upload your own grayscale image / XTF log.</p>
+        <span class="section-label">Sample dataset</span>
+        <select id="samples" aria-label="Sample dataset" title="Select a synthetic sonar sample"></select>
+        <div class="btn-row">
+          <button id="runSample" title="Run full analysis pipeline on the selected sample">&#9654; Analyze sample</button>
+          <button id="runBenchmark" class="secondary" title="Run benchmark across all configured samples">&#128202; Benchmark</button>
+        </div>
+        <span class="section-label">Upload your own</span>
+        <p style="margin:0"><input id="file" type="file" accept="image/*,.xtf" aria-label="Upload file" /></p>
+
+        <div id="stats" style="display:none" aria-live="polite"></div>
+        <div id="sevSummary" class="sev-summary" aria-live="polite"></div>
+
+        <div class="perf" id="perf" style="display:none" aria-live="polite">
+          <div class="perf-header">
+            <h4>Stage latencies · p95</h4>
+            <span class="perf-hint">milliseconds</span>
+          </div>
+          <div class="bars" id="perfBars"></div>
+        </div>
+
+        <h3 class="card-title" style="margin-top:22px">Threat alerts <span class="muted" style="font-weight:500;font-size:11px;text-transform:none;letter-spacing:0">top 20, sorted by score</span></h3>
+        <div class="alerts-wrap">
+          <div id="alerts"><p class="muted" style="padding:10px 4px;margin:0">No contacts yet — run an analysis above to populate this list.</p></div>
+        </div>
+      </section>
+
+      <section class="card" id="sonarCard">
+        <div class="row-spaced" style="margin-bottom: 14px;">
+          <h3 class="card-title" style="margin:0;padding:0;border:none">Validated detections</h3>
+          <div id="precision" class="precision muted" title="GPS-derived tagging accuracy">Precision: —</div>
+        </div>
+        <div class="preview-wrap" id="previewWrap">
+          <div class="preview-empty" id="previewEmpty">
+            <div class="icon">&#9875;</div>
+            <h4>No sonar scan loaded</h4>
+            <p>Pick a sample on the left and click <strong>Analyze sample</strong>, or upload an image/XTF file.</p>
+            <p>Detected objects, names, confidence scores, and severity boxes will appear overlaid here.</p>
+          </div>
+          <img id="preview" alt="Sonar preview with detections" style="display:none" />
+        </div>
+        <div class="detail-meta" id="scanMeta" style="margin-top: 12px;"></div>
+      </section>
+    </div>
+
+    <div class="bottom-row">
+      <section class="card" id="mapCard">
+        <div class="row-spaced" style="margin-bottom: 14px;">
+          <h3 class="card-title" style="margin:0;padding:0;border:none">Geotagged threat map</h3>
+          <div class="row">
+            <button class="secondary" id="findPinsBtn" type="button" title="Return the map to the detected pins">Find pins</button>
+            <span class="muted" id="mapNote">Loading survey location…</span>
+          </div>
+        </div>
+        <div class="map-legend" aria-label="Map marker legend">
+          <span class="map-legend-item"><span class="map-legend-swatch" style="background:#00bcd4"></span>Unclassified</span>
+          <span class="map-legend-item"><span class="map-legend-outline"></span>Outline = severity (gray: Low)</span>
+        </div>
+        <div id="map"></div>
+      </section>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const sevStyles = {
+      critical: { fill: "#ff4b4b", stroke: "#a01e1e", badge: "Critical", alertBorder: "#ff4b4b" },
+      high:     { fill: "#ffb060", stroke: "#a05a1e", badge: "High",     alertBorder: "#ffb060" },
+      medium:   { fill: "#60c0ff", stroke: "#1e5a8a", badge: "Medium",   alertBorder: "#60c0ff" },
+      low:      { fill: "#a0b0b8", stroke: "#405058", badge: "Low",      alertBorder: "#a0b0b8" },
+    };
+    const detectionColors = {
+      plastic_net: "#ffb428",
+      metal_barrel: "#ff5050",
+      tire: "#2878b4",
+      wood_wreck: "#50c828",
+      unclassified: "#00bcd4",
+      anomaly: "#b43cff",
+    };
+    const stageOrder = ["preprocess", "yolo", "anomaly", "segformer", "shadow", "geojson"];
+    const statLabels = [
+      ["alert_count", "Alerts"],
+      ["known_count", "Known"],
+      ["anomaly_count", "Anomalies"],
+    ];
+
+    let surveyCenter = [13.048, 80.412];
+    let threatPoints = [];
+    const map = L.map("map").setView(surveyCenter, 12);
+    L.tileLayer(
+      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      { maxZoom: 17, attribution: "Tiles © Esri" }
+    ).addTo(map);
+    let layer = L.layerGroup().addTo(map);
+
+    function showThreatPoints() {
+      if (threatPoints.length === 0) {
+        map.setView(surveyCenter, 12);
+      } else if (threatPoints.length === 1) {
+        map.setView(threatPoints[0], 14);
+      } else {
+        map.fitBounds(threatPoints, { padding: [50, 50], maxZoom: 14 });
+      }
+    }
+
+    document.getElementById("findPinsBtn").addEventListener("click", showThreatPoints);
+
+    function setLoading(active) {
+      const wrap = document.getElementById("previewWrap");
+      if (active) wrap.classList.add("is-loading");
+      else wrap.classList.remove("is-loading");
+    }
+
+    async function loadSamples() {
+      try {
+        const cfg = await fetch("/api/map-config").then(r => r.json());
+        surveyCenter = [cfg.lat, cfg.lon];
+        map.setView(surveyCenter, 12);
+        document.getElementById("mapNote").textContent = cfg.note;
+      } catch (e) { /* keep defaults */ }
+      try {
+        const data = await fetch("/api/samples").then(r => r.json());
+        const sel = document.getElementById("samples");
+        const opts = (data.samples || []).map(n => `<option value="${n}">${n}</option>`).join("");
+        const xtf = (data.xtf_samples || []).map(n => `<option value="${n}">${n} (XTF)</option>`).join("");
+        sel.innerHTML = opts + xtf;
+      } catch (e) {
+        document.getElementById("samples").innerHTML = `<option value="">(samples unavailable)</option>`;
+      }
+    }
+
+    function formatVal(v) {
+      try {
+        const n = Number(v);
+        if (!isFinite(n)) return String(v);
+        if (Math.abs(n) >= 1000) return n.toFixed(0);
+        if (Math.abs(n) >= 10) return n.toFixed(1);
+        return n.toFixed(1);
+      } catch { return String(v); }
+    }
+
+    function renderPerf(timings) {
+      const box = document.getElementById("perf");
+      const bars = document.getElementById("perfBars");
+      if (!timings) { box.style.display = "none"; return; }
+      const present = stageOrder.filter(k => timings[k] != null);
+      if (present.length === 0) { box.style.display = "none"; return; }
+      const max = Math.max(50, ...present.map(k => Number(timings[k] || 0)));
+      bars.innerHTML = present.map(k => {
+        const raw = Number(timings[k] || 0);
+        const pct = Math.min(100, Math.max(0, (raw / max) * 100)).toFixed(0);
+        const display = raw >= 10000
+          ? (raw/1000).toFixed(1) + " s"
+          : formatVal(raw) + " ms";
+        return `<div class="bar-row" title="${k}: ${display}">
+          <span class="label">${k}</span>
+          <div class="bar-track" aria-hidden="true"><div class="bar-fill" style="width:${pct}%"></div></div>
+          <span class="bar-val">${display}</span>
+        </div>`;
+      }).join("");
+      box.style.display = "block";
+    }
+
+    function renderPrecision(budgetM) {
+      const el = document.getElementById("precision");
+      if (!budgetM) { el.className = "precision muted"; el.textContent = "Precision: —"; el.title = "Precision not available"; return; }
+      const cm = budgetM * 100.0;
+      const ok = budgetM <= 0.10;
+      el.className = "precision " + (ok ? "ok" : "warn");
+      const meets = ok ? "✓ <10 cm target" : "⚠ reduce MPP for <10 cm";
+      const txt = `±${cm.toFixed(2)} cm · ${meets}`;
+      el.textContent = txt;
+      el.title = `Geotag precision budget: ${cm.toFixed(2)} cm (${ok ? "meets 10 cm target" : "above 10 cm target"})`;
+    }
+
+    function renderSummary(counts) {
+      const el = document.getElementById("sevSummary");
+      if (!counts || Object.keys(counts).length === 0) { el.innerHTML = ""; return; }
+      el.innerHTML = Object.entries(counts).map(([k, v]) => {
+        const s = sevStyles[(k || "low").toLowerCase()] || sevStyles.low;
+        return `<span class="sev-chip" style="background:${s.fill}22;color:${s.fill};border:1px solid ${s.stroke}" title="${s.badge} severity count">${s.badge}: ${v || 0}</span>`;
+      }).join("");
+    }
+
+    function renderStats(s) {
+      const el = document.getElementById("stats");
+      const total = (s.known_count || 0) + (s.anomaly_count || 0);
+      const rows = [
+        ...statLabels.map(([k, label]) => [label, s[k] || 0]),
+        ["Total", total],
+      ];
+      el.innerHTML = rows.map(([k, v]) =>
+        `<span class="stat"><span class="muted" style="font-size:11px">${k}</span><b>${v}</b></span>`
+      ).join("");
+      el.style.display = "flex";
+    }
+
+    function renderScanMeta(s) {
+      const el = document.getElementById("scanMeta");
+      if (!s || Object.keys(s).length === 0) { el.innerHTML = ""; return; }
+      const parts = [];
+      if (s.precision_budget_m != null) {
+        const cm = (s.precision_budget_m * 100).toFixed(2);
+        parts.push(`<span><b>Precision</b>±${cm} cm</span>`);
+      }
+      if (s.source) parts.push(`<span><b>Source</b>${String(s.source)}</span>`);
+      if (s.sample_name) parts.push(`<span><b>Sample</b>${String(s.sample_name).slice(0, 48)}</span>`);
+      if (s.timings_ms) {
+        const keys = stageOrder.filter(k => s.timings_ms[k] != null);
+        const sum = keys.reduce((a, k) => a + Number(s.timings_ms[k] || 0), 0);
+        const pretty = sum >= 1000 ? (sum/1000).toFixed(2) + " s" : sum.toFixed(1) + " ms";
+        parts.push(`<span><b>Total</b>${pretty}</span>`);
+      }
+      el.innerHTML = parts.join("");
+    }
+
+    function showPreview() {
+      const img = document.getElementById("preview");
+      const empty = document.getElementById("previewEmpty");
+      empty.style.display = "none";
+      img.style.display = "block";
+    }
+
+    function render(result) {
+      const previewEl = document.getElementById("preview");
+      previewEl.onload = () => setLoading(false);
+      previewEl.onerror = () => setLoading(false);
+      setLoading(true);
+      previewEl.src = "/api/preview?" + Date.now();
+      showPreview();
+
+      const s = result.stats || {};
+      renderStats(s);
+      renderSummary(s.severity_counts || {});
+      renderPerf(s.timings_ms);
+      renderPrecision(s.precision_budget_m);
+      renderScanMeta(s);
+
+      const alerts = document.getElementById("alerts");
+      const items = result.detections || [];
+      if (items.length === 0) {
+        alerts.innerHTML = `<p class="muted" style="padding:10px 4px;margin:0">No contacts detected in this scan.</p>`;
+      } else {
+        alerts.innerHTML = items.slice(0, 20).map((d, index) => {
+          const sev = (d.severity || "low").toLowerCase();
+          const sty = sevStyles[sev] || sevStyles.low;
+          const label = String(d.label || "unknown");
+          const classColor = detectionColors[label.toLowerCase()] || "#e2ecf3";
+          const shadow = d.extras && d.extras.shadow ? `<span>shadow ${String(d.extras.shadow).slice(0, 6)}</span>` : "";
+          const mask = d.extras && d.extras.segformer ? `<span>mask ${(Number(d.extras.segformer.mask_area_pct || 0)*100).toFixed(0)}%</span>` : "";
+          const gps = d.gps_ping_index != null ? `<span>ping ${d.gps_ping_index}</span>` : "";
+          const size = (d.w && d.h) ? `<span>${d.w}×${d.h}px</span>` : "";
+          const feature = (result.geojson && result.geojson.features || []).find(f => Number(f.properties && f.properties.id) === index + 1);
+          const featureProps = feature && feature.properties || {};
+          const range = typeof featureProps.range_from_track_m === "number" && Number.isFinite(featureProps.range_from_track_m)
+            ? `<span>range ${Number(featureProps.range_from_track_m).toFixed(1)} m</span>`
+            : "";
+          const depth = typeof featureProps.depth_m === "number" && Number.isFinite(featureProps.depth_m)
+            ? `<span>depth ${Number(featureProps.depth_m).toFixed(1)} m</span>`
+            : `<span title="Measured bathymetry is not available for this scan">depth unavailable</span>`;
+          const prettyScore = (typeof d.score === "number" && d.score.toFixed) ? d.score.toFixed(3) : String(d.score);
+          return `<div class="alert" style="border-left-color:${sty.alertBorder}">
+            <div class="alert-info">
+              <div class="alert-head">
+                <span class="source" style="color:${classColor};border-color:${classColor}66">#${index + 1}</span>
+                <span class="name" style="color:${classColor}">${label.replace(/_/g, " ")}</span>
+                <span class="score">${prettyScore}</span>
+                ${d.source ? `<span class="source">${String(d.source)}</span>` : ""}
+              </div>
+              <div class="meta">${range} ${depth} ${size} ${shadow} ${mask} ${gps}</div>
+            </div>
+            <span class="sev ${sty.badge}" title="Severity: ${sty.badge}">${sty.badge}</span>
+          </div>`;
+        }).join("");
+      }
+
+      layer.clearLayers();
+      threatPoints = [];
+      for (const f of (result.geojson && result.geojson.features) || []) {
+        const [lon, lat] = f.geometry.coordinates;
+        threatPoints.push([lat, lon]);
+        const sev = ((f.properties && f.properties.severity) || "low").toLowerCase();
+        const sty = sevStyles[sev] || sevStyles.low;
+        const props = f.properties || {};
+        const label = String(props.label || "unknown");
+        const detectionId = Number(props.id) || threatPoints.length;
+        const markerColor = detectionColors[label.toLowerCase()] || "#a0b0b8";
+        const prec = props.precision_meters != null ? ` (±${(props.precision_meters*100).toFixed(1)} cm)` : "";
+        const scoreStr = (typeof props.score === "number" && props.score.toFixed) ? props.score.toFixed(3) : String(props.score || "—");
+        const rangeInfo = typeof props.range_from_track_m === "number" && Number.isFinite(props.range_from_track_m)
+          ? `range from track: <b>${Number(props.range_from_track_m).toFixed(1)} m</b><br/>`
+          : "";
+        const depthInfo = typeof props.depth_m === "number" && Number.isFinite(props.depth_m)
+          ? `depth: <b>${Number(props.depth_m).toFixed(1)} m</b><br/>`
+          : `depth: <b title="Measured bathymetry is not available for this scan">unavailable</b><br/>`;
+        L.marker([lat, lon], {
+          icon: L.divIcon({
+            className: "map-marker-icon",
+            html: `<span class="map-marker-label" style="background:${markerColor};border-color:${sty.stroke}" title="#${detectionId} ${label}">${detectionId}</span>`,
+            iconSize: [30, 30],
+            iconAnchor: [15, 15],
+          }),
+        })
+          .bindTooltip(`#${detectionId} · ${label.replace(/_/g, " ")} · ${sty.badge} severity`)
+          .bindPopup(
+            `<div style="min-width:220px">
+               <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px">
+                <b style="font-size:13px;color:${markerColor}">#${detectionId} ${label.replace(/_/g, " ")}</b>
+                 <span class="sev ${sty.badge}" style="margin:0">${sty.badge}</span>
+               </div>
+               <div style="font-size:12px;line-height:1.55;color:#334;color:#1d3344">
+                 score: <b>${scoreStr}</b> · source: ${String(props.source || "—")}${prec}<br/>
+                 ${rangeInfo}${depthInfo}
+                 ${props.shadow ? `shadow: <b>${String(props.shadow)}</b><br/>` : ""}
+                 ${props.along_m != null ? `along: <b>${Number(props.along_m).toFixed(1)} m</b> · across: <b>${Number(props.across_m).toFixed(1)} m</b><br/>` : ""}
+                 ${props.gps_ping_index != null ? `ping index: <b>${props.gps_ping_index}</b>` : ""}
+               </div>
+             </div>`
+          )
+          .addTo(layer);
+      }
+      if (threatPoints.length) showThreatPoints();
+    }
+
+    async function withButton(btn, loadingText, task) {
+      const origText = btn.textContent;
+      btn.disabled = true;
+      const hasSpin = btn.querySelector(".spinner");
+      btn.innerHTML = `<span class="spinner"></span> ${loadingText}`;
+      try {
+        return await task();
+      } finally {
+        btn.disabled = false;
+        btn.textContent = origText;
+      }
+    }
+
+    document.getElementById("runSample").onclick = async () => {
+      const btn = document.getElementById("runSample");
+      const name = document.getElementById("samples").value;
+      if (!name) { alert("Select a sample first"); return; }
+      await withButton(btn, "Analyzing…", async () => {
+        setLoading(true);
+        try {
+          const result = await fetch("/api/analyze/sample/" + encodeURIComponent(name), { method: "POST" }).then(r => r.json());
+          render(result);
+        } catch (e) {
+          setLoading(false);
+          alert("Analysis request failed: " + e.message);
+        }
+      });
+    };
+
+    document.getElementById("runBenchmark").onclick = async () => {
+      const btn = document.getElementById("runBenchmark");
+      await withButton(btn, "Running…", async () => {
+        const rep = await fetch("/api/benchmark/run", { method: "POST" }).then(r => r.json());
+        const s = rep.aggregate_stage_ms_p95 || {};
+        const budget = rep.precision_budget || {};
+        const fakeStats = {
+          alert_count: 0, known_count: 0, anomaly_count: 0,
+          severity_counts: {},
+          timings_ms: s,
+          precision_budget_m: budget.budget_m,
+        };
+        render({ stats: fakeStats, detections: [], geojson: { type: "FeatureCollection", features: [] } });
+        window.alert(
+          "Benchmark complete\n" +
+          `Samples: ${(rep.samples_analyzed || []).length}\n` +
+          `Precision: ${budget.budget_cm?.toFixed(2) || "—"} cm (${budget.meets_10cm_target ? "PASS" : "WARN"})\n` +
+          `Report: ${rep.report_path || "(see data/outputs)"}`
+        );
+      });
+    };
+
+    document.getElementById("file").onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const btn = document.getElementById("runSample");
+      const tag = file.name.length > 22 ? (file.name.slice(0, 19) + "…") : file.name;
+      await withButton(btn, `Uploading ${tag}`, async () => {
+        setLoading(true);
+        try {
+          const body = new FormData();
+          body.append("file", file);
+          const result = await fetch("/api/analyze/upload", { method: "POST", body }).then(r => r.json());
+          render(result);
+        } catch (err) {
+          setLoading(false);
+          alert("Upload failed: " + err.message);
+        }
+      });
+    };
+
+    document.getElementById("refreshBtn").onclick = () => {
+      const img = document.getElementById("preview");
+      if (img && img.src && !img.src.includes(";") && !img.src.startsWith("data:")) {
+        setLoading(true);
+        img.onload = () => setLoading(false);
+        img.onerror = () => setLoading(false);
+        img.src = "/api/preview?" + Date.now();
+      }
+    };
+
+    loadSamples();
+  </script>
+</body>
+</html>
